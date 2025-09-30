@@ -1,29 +1,4 @@
-
-
-lagfun <- function(dataframe, lagX, variable) {
-  temp_df <- dataframe
-  lag_var <- dataframe[variable]
-
-  for (i in seq(lagX)) {
-    temp_df[str_c(variable, " lag ", i)] <- lag_var
-    ind <- seq(from = nrow(temp_df), to = nrow(temp_df) - i + 1, by = -1)
-
-    temp_df[str_c(variable, " lag ", i)][-seq(i), ] <- lag_var[-ind, ]
-
-  }
-
-  #Kanske inte vill ta bort detta ifall vi laggar flera
-  temp_df <- temp_df[-seq(lagX), ]
-  return(temp_df)
-
-}
-
-
-#setwd("C:/Users/arone/Desktop/Kandidat/Kalmar/Shinyfiles")
-
-#PA_df <- read.csv("purpleair_kalmar.csv")
-
-
+library(shiny)
 
 ui <- fluidPage(
   titlePanel("Justering av PurpleAir mätvärden"),
@@ -78,7 +53,7 @@ ui <- fluidPage(
 
 server <- function(input, output) {
   final_df <- reactive({
-
+  iris
 
   })
 
