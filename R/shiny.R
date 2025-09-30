@@ -2,7 +2,7 @@ library(shiny)
 library(jsonlite)
 
 ui <- fluidPage(
-  titlePanel("Justering av PurpleAir mätvärden"),
+  titlePanel("Fewest clicks to Poland"),
   fluidRow(p("")),
   fluidRow(p("")),
 
@@ -32,7 +32,7 @@ ui <- fluidPage(
            )
     ),
     column(4,
-           h4("Justerade värden"),
+           h4("Abstract"),
            div(class = "scrollable-table",
                textOutput("predictions")
            )
@@ -44,11 +44,11 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
-  api_data <- reactive({api_wiki_data(current_article = "Gill")})
+  api_data <- reactive({api_wiki_data(current_article = "Combination")})
 
   abstract <- reactive({
 
-  langs <- c(pol = "Polish", en = "English", swe = "Swedish")
+  langs <- c(pl = "Polish", en = "English", sv = "Swedish")
 
   parse_data(api_data(), lan = names(langs)[which(input$lan == langs)])$abstract_text
 
@@ -56,7 +56,7 @@ server <- function(input, output) {
 
   related <- reactive({
 
-    langs <- c(pol = "Polish", en = "English", swe = "Swedish")
+    langs <- c(pl = "Polish", en = "English", sv = "Swedish")
 
     parse_data(api_data(), lan = names(langs)[which(input$lan == langs)])$related_topics
 

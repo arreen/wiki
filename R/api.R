@@ -30,7 +30,7 @@ parse_data <- function(api_data, lan = "en"){
     abstract_text <- abstract$value[abstract$lang == lan]
   } else {
 
-    langs <- c(pol = "Polish", en = "English", swe = "Swedish")
+    langs <- c(pl = "Polish", en = "English", sv = "Swedish")
     abstract_text <- paste0("This article does not exist in ", langs[lan], ".")
 
   }
@@ -42,7 +42,7 @@ parse_data <- function(api_data, lan = "en"){
 
 }
 
-a <- api_wiki_data()
+a <- api_wiki_data("Combination")
 parse_data(a)
 
 "abstract"
