@@ -44,7 +44,7 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
-  api_data <- reactive({api_wiki_data(current_article = "Smoltification")})
+  api_data <- reactive({api_wiki_data(current_article = "Gill")})
 
   abstract <- reactive({
 

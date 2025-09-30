@@ -15,14 +15,16 @@ api_wiki_data <- function(current_article = "Smoltification") {
   current_article <- current_article
     link <- paste0(db, current_article)
 
-  data <- fromJSON(paste0("http://dbpedia.org/data/", current_article, ".json"))
+  data <- list(json = fromJSON(paste0("http://dbpedia.org/data/", current_article, ".json")), link = link)
+
+
 
   return(data)
 }
 
-parse_data <- function(data, lan = "en"){
-
-  information <- data[[link]]
+parse_data <- function(api_data, lan = "en"){
+  data <- api_data$json
+  information <- data[[api_data$link]]
   abstract <- information[[which(str_detect(names(information), "abstract")) ]]
   if (lan %in% abstract$lang) {
     abstract_text <- abstract$value[abstract$lang == lan]
@@ -41,7 +43,7 @@ parse_data <- function(data, lan = "en"){
 }
 
 a <- api_wiki_data()
-
+parse_data(a)
 
 "abstract"
 
