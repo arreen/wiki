@@ -1,4 +1,5 @@
 library(shiny)
+library(jsonlite)
 
 ui <- fluidPage(
   titlePanel("Justering av PurpleAir mätvärden"),
@@ -24,36 +25,40 @@ ui <- fluidPage(
   fluidRow(
     column(4,
            div(class = "well-section",
-               selectInput(inputId = "Tidsupplosning", label = "Välj tidsupplösning",
-                           choices = c("30-minuters medelvärden", "Dygnsmedelvärden"))
-           ),
-           div(class = "well-section",
-               fileInput("file", "Ladda upp API-data från PurpleAir")
-           ),
-           div(class = "well-section",
-               downloadButton("downloadData", "Ladda ned justerade värden")
+               selectInput(inputId = "lan", label = "Choose a language",
+                           choices = c("Polish", "English", "Swedish"))
            ), column(10,
-                     p("Efter du laddat upp datamaterialet, vänta 30-60 sekunder på att justeringen utförs. Du måste ladda upp minst 7 dagar. De första 2 dagarna av ditt data kommer tas bort, det behöver göras för att kunna justera värdena"),
+                     textOutput("related"),
            )
     ),
     column(4,
            h4("Justerade värden"),
            div(class = "scrollable-table",
-               tableOutput("predictions")
+               textOutput("predictions")
            )
     )
-  ),
-  fluidRow(
-    column(12, align = "center",
-           br(),
-           a(href = "PurpleAir_API_Guide.pdf", target = "_blank", "Kort guide för att ladda ned data från PurpleAirs databas via API:n")
-    )
   )
-)
+
+  )
+
 
 server <- function(input, output) {
-  final_df <- reactive({
-  iris
+
+  api_data <- reactive({api_wiki_data(current_article = "Smoltification")})
+
+  abstract <- reactive({
+
+  langs <- c(pol = "Polish", en = "English", swe = "Swedish")
+
+  parse_data(api_data(), lan = names(langs)[which(input$lan == langs)])$abstract_text
+
+  })
+
+  related <- reactive({
+
+    langs <- c(pol = "Polish", en = "English", swe = "Swedish")
+
+    parse_data(api_data(), lan = names(langs)[which(input$lan == langs)])$related_topics
 
   })
 
@@ -64,8 +69,12 @@ server <- function(input, output) {
     }
   )
 
-  output$predictions <- renderTable({
-    final_df()
+  output$predictions <- renderText({
+    abstract()
+  })
+
+  output$related <- renderText({
+    related()
   })
 
 }
