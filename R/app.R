@@ -67,7 +67,7 @@ ui <- fluidPage(
                      uiOutput("dynamic_buttons"),
            )
     ),
-    column(4,
+    column(6,
            h4("Abstract"),
            div(class = "scrollable-table",
                textOutput("predictions")
@@ -80,7 +80,7 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
-  current_article <- reactiveVal("Blood")
+  current_article <- reactiveVal("Ishara")
 
   api_data <- reactive({api_wiki_data( current_article = current_article() )})
 
@@ -112,23 +112,23 @@ server <- function(input, output) {
 
   output$dynamic_buttons <- renderUI({
 
-    tagList(
     lapply(seq_along(related()), function(i) {
       actionButton(
         inputId = paste0("btn_", i ),
         label = related()[i]
       )
     })
-    )
   })
 
-  observeEvent(input$dynamic_buttons, { }, ignoreInit = TRUE)
+
+  button_clicked <- reactiveVal(NULL)
 
   observe(
     lapply(seq_along(related()), function(i) {
       btn_id <- paste0("btn_", i)
       observeEvent(input[[btn_id]], {
-        current_article(related()[i])
+        #current_article(related()[[i]])
+        button_clicked(i)
 
       })
     })
@@ -136,7 +136,18 @@ server <- function(input, output) {
 
 
 
+  reactive_var <- eventReactive(button_clicked(), {
+    related()[button_clicked()]
+
+  })
+
+
+  observeEvent(reactive_var(), {
+    current_article(reactive_var())
+
+  })
+
 }
 
 
-shinyApp(ui, server,options = list(test.mode = TRUE))
+shinyApp(ui, server)
