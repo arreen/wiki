@@ -62,7 +62,7 @@ ui <- fluidPage(
     column(4,
            div(class = "well-section",
                selectInput(inputId = "lan", label = "Choose a language",
-                           choices = c("Polish", "English", "Swedish"))
+                           choices = c("English", "Polish", "Swedish"))
            ), column(10,
                      uiOutput("dynamic_buttons"),
            )
