@@ -1,16 +1,20 @@
 Package: Wiki
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Wiki race game
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Jane", "Doe",
-      email = "jane@example.com",
+      "Pontus", "Olsson",
+      email = "ponol900@student.liu.com",
+      role = c("aut")
+    ),
+    person(
+      "Aron", "Enström",
+      email = "aroen488@student.liu.com",
       role = c("aut", "cre")
     )
   )
-Description: More about what it does (maybe more than one line).
-    Continuation lines should be indented.
+Description: This package contains all the custom functions that are used to make the wiki race application.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
