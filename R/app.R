@@ -39,7 +39,7 @@ parse_data <- function(api_data, lan = "en"){
 
 ui <- fluidPage(
   fluidRow(column(6,titlePanel("Fewest clicks to Poland"))),
-  fluidRow(column(2, actionButton("back", "Previous article")), column(2, actionButton("next", "Next article")) ),
+  fluidRow(column(2, actionButton("back", "Previous article"))), #column(2, actionButton("next", "Next article")) ),
   fluidRow(p("")),
 
 
@@ -82,11 +82,12 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
-  current_article <- reactiveVal("Roman_Sitko")
+  init_article <- "Roman_Sitko"
+
+  current_article <- reactiveVal(init_article)
 
 
-  history <- reactiveVal("")
-  observeEvent(current_article(), history(paste0(history(), current_article(), sep = "SEParATOR") ), ignoreInit = TRUE)
+  history <- reactiveVal(init_article)
 
 
 
@@ -94,10 +95,19 @@ server <- function(input, output) {
 
 
   observeEvent(input$back, {
-    hist <- str_remove_all(str_split(history(), "SEParATOR", simplify = TRUE), pattern = "")
+
+    if (current_article() == init_article) {
+      # Known bug, if same article is reached later
+
+    } else{
+
+
+    hist <- str_split(history(), "SEParATOR", simplify = TRUE)
     hist <- hist[-length(hist)]
-    history(str_c(hist, sep = "SEParATOR"))
-    #current_article(hist[length(hist)])
+    history(str_c(hist, sep = "SEParATOR", collapse = "SEParATOR"))
+    current_article(hist[length(hist)])
+    }
+
 
   })
 
@@ -207,6 +217,18 @@ server <- function(input, output) {
   observeEvent(reactive_var(), {
     current_article(reactive_var())
   })
+
+  observeEvent(button_clicked(), {
+
+    if (current_article() == init_article) {
+
+    } else{
+    history(str_c(history(), current_article(), sep = "SEParATOR", collapse = ""))
+    }
+
+
+  }, ignoreInit = TRUE)
+
 
 }
 
