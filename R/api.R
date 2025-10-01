@@ -42,7 +42,7 @@ parse_data <- function(api_data, lan = "en"){
 
 }
 
-a <- api_wiki_data("Combination")
+a <- api_wiki_data("Ice")
 parse_data(a)
 
 "abstract"
