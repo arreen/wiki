@@ -68,7 +68,7 @@ ui <- fluidPage(
                      uiOutput("dynamic_buttons"),
            )
     ),
-    column(6, h2(textOutput("history")),
+    column(6,
            h3(textOutput("current_article")),
            h4("Abstract"),
            div(class = "scrollable-table",
@@ -90,14 +90,9 @@ server <- function(input, output) {
   history <- reactiveVal(init_article)
 
 
-
-  output$history <- renderText(history())
-
-
   observeEvent(input$back, {
 
     if (current_article() == init_article) {
-      # Known bug, if same article is reached later
 
     } else{
 
