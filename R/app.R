@@ -4,7 +4,7 @@ library(memoise)
 library(stringr)
 
 # memoise cachar funktionen körd med samma värden memoise()
-api_wiki_data <- function(current_article = "Smoltification") {
+api_wiki_data <- memoise::memoise( function(current_article = "Smoltification") {
 
   db <- "http://dbpedia.org/resource/"
   current_article <- current_article
@@ -15,7 +15,7 @@ api_wiki_data <- function(current_article = "Smoltification") {
 
 
   return(data)
-}
+} )
 
 parse_data <- function(api_data, lan = "en"){
   data <- api_data$json
@@ -38,9 +38,10 @@ parse_data <- function(api_data, lan = "en"){
 }
 
 ui <- fluidPage(
-  titlePanel("Fewest clicks to Poland"),
+  fluidRow(column(6,titlePanel("Fewest clicks to Poland"))),
+  fluidRow(column(2, actionButton("back", "Previous article")), column(2, actionButton("next", "Next article")) ),
   fluidRow(p("")),
-  fluidRow(p("")),
+
 
   # Styling
   tags$head(
@@ -67,7 +68,8 @@ ui <- fluidPage(
                      uiOutput("dynamic_buttons"),
            )
     ),
-    column(6,
+    column(6, h2(textOutput("history")),
+           h3(textOutput("current_article")),
            h4("Abstract"),
            div(class = "scrollable-table",
                textOutput("predictions")
@@ -80,9 +82,47 @@ ui <- fluidPage(
 
 server <- function(input, output) {
 
-  current_article <- reactiveVal("Ishara")
+  current_article <- reactiveVal("Roman_Sitko")
 
-  api_data <- reactive({api_wiki_data( current_article = current_article() )})
+
+  history <- reactiveVal("")
+  observeEvent(current_article(), history(paste0(history(), current_article(), sep = "SEParATOR") ), ignoreInit = TRUE)
+
+
+
+  output$history <- renderText(history())
+
+
+  observeEvent(input$back, {
+    hist <- str_remove_all(str_split(history(), "SEParATOR", simplify = TRUE), pattern = "")
+    hist <- hist[-length(hist)]
+    history(str_c(hist, sep = "SEParATOR"))
+    #current_article(hist[length(hist)])
+
+  })
+
+
+  output$current_article <- renderText({
+
+    if (current_article() == "Poland") {
+      paste("You found Poland in", length(str_split(history(), "SEParATOR")), "clicks!")
+    } else{current_article()}
+
+
+
+
+    })
+
+  api_data <- reactive({
+
+    if (current_article() == "Poland") {
+      "Win"
+    } else {
+      api_wiki_data( current_article = current_article() )
+    }
+
+
+    })
 
 
 
@@ -90,7 +130,25 @@ server <- function(input, output) {
 
   langs <- c(pl = "Polish", en = "English", sv = "Swedish")
 
-  parse_data(api_data(), lan = names(langs)[which(input$lan == langs)])$abstract_text
+  if (current_article() == "Poland") {
+   " ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    ⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣴⣶⣿⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+    ⠀⢀⣀⣤⣶⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡀⠀⠀⠀
+    ⠀⢻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣧⠀⠀⠀
+    ⠀⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡆⠀⠀
+    ⠀⠸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠀⠀
+    ⠀⠀⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣋⠁⠀⠀
+    ⠀⠀⢹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀
+    ⠀⠀⠘⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀
+    ⠀⠀⠀⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡄⠀
+    ⠀⠀⠀⠀⠀⠉⠛⣿⡿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡧⠀
+    ⠀⠀⠀⠀⠀⠀⠀⠈⠃⠀⠙⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠋⠀⠀
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠛⣿⣿⣿⣿⣿⣿⣿⣿⣿⠋⠀⠀⠀⠀
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠁⠀⠀⠀⠀⠈⠙⢿⡄⠀⠀⠀⠀
+    ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀"
+  } else{parse_data(api_data(), lan = names(langs)[which(input$lan == langs)])$abstract_text}
+
+
 
   })
 
@@ -98,7 +156,11 @@ server <- function(input, output) {
 
     langs <- c(pl = "Polish", en = "English", sv = "Swedish")
     # Only takes the 15 first topics
-    parse_data(api_data(), lan = names(langs)[which(input$lan == langs)])$related_topics[1:15]
+
+    if (current_article() == "Poland") {
+      rep("Poland", 48)
+    } else{parse_data(api_data(), lan = names(langs)[which(input$lan == langs)])$related_topics[1:15]}
+
 
   })
 
@@ -144,7 +206,6 @@ server <- function(input, output) {
 
   observeEvent(reactive_var(), {
     current_article(reactive_var())
-
   })
 
 }
