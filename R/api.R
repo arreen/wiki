@@ -1,5 +1,3 @@
-library(stringr)
-
 #' @title
 #' api_wiki_data
 #' @description
@@ -10,16 +8,17 @@ library(stringr)
 #'
 #' @param current_article The article that should return a .json.
 #'
-#' @returns a .json file of the article
+#' @returns A .json file of the article
+#' @import httr2
 #' @export
 #'
 #' @examples api_wiki_data(current_article = "Helen_Abbey")
 
-api_wiki_data <- function(current_article = "Smoltification") {
+api_wiki_data <- memoise::memoise(function(current_article = "Smoltification") {
 
 
 
-  sparql_query_abstract <- paste0("PREFIX dbo: <http://dbpedia.org/ontology/>
+  sparsql_query_abstract <- paste0("PREFIX dbo: <http://dbpedia.org/ontology/>
                                   SELECT ?abstract
                                 WHERE {
                                   <http://dbpedia.org/resource/", current_article, "> dbo:abstract ?abstract
@@ -34,46 +33,45 @@ api_wiki_data <- function(current_article = "Smoltification") {
                                }
                                  LIMIT 15")
 
-  resp <- request("https://dbpedia.org/sparql") %>%
-    req_url_query(
-      query  = sparql_query_abstract,
+  resp <- httr2::req_perform(
+    httr2::req_url_query(httr2::request("https://dbpedia.org/sparql"),
+      query  = sparsql_query_abstract,
       format = "application/sparql-results+json"
-    ) %>%
-    req_perform()
+    ) )
 
-  body <- resp_body_json(resp)
-  abstract <- body[["results"]][["bindings"]][[1]][["abstract"]]
 
-  resp <- request("https://dbpedia.org/sparql") %>%
-    req_url_query(
-      query  = sparsql_query_topics,
-      format = "application/sparql-results+json"
-    ) %>%
-    req_perform()
+  body <- httr2::resp_body_json(resp)
+  abstract <- body[["results"]][["bindings"]]
+
+  resp <- httr2::req_perform(
+    httr2::req_url_query(httr2::request("https://dbpedia.org/sparql"),
+                  query  = sparsql_query_topics,
+                  format = "application/sparql-results+json"
+    ) )
 
   # Här sätter man typ return istället för body <- resp_body_json(...)
-  non_parsed_links <- resp_body_json(resp)
+  non_parsed_links <- httr2::resp_body_json(resp)
 
 
   data <- list(abstracts = abstract, links = non_parsed_links)
   return(data) # return the output
-}
-
-a <- api_wiki_data("Poland")
+})
 
 #' @title parse_data
 #' @description
 #' parses an output from api_wiki_data
 #'
 #' @param api_data The output you want to parse
-#' @param lan The language you want to print it out in. You can choose betweeen English, Polish and Swedish.
+#' @param lan The language you want to print it out in. You can choose betweeen English ("en"), Polish ("pl") and Swedish ("sv").
 #'
 #' @returns A list with related topics and the article abstract.
+#' @import stringr
 #' @export
 #'
 #' @examples parse_data(api_wiki_data(current_article = "Helen_Abbey"))
 #'
 #'
+
 parse_data <- function(api_data, lan = "en"){
 
   body <- api_data$links
@@ -82,17 +80,27 @@ parse_data <- function(api_data, lan = "en"){
     links <- c(links, body[["results"]][["bindings"]][[i]][["link"]][["value"]])
   }
 
-  related_topics <- str_remove(links, "http://dbpedia.org/resource/")
+  related_topics <- stringr::str_remove(links, "http://dbpedia.org/resource/")
 
 
   # ----------------------------------------
-  for (i in 1:length(api_data$abstracts)) {
-    api_data$abstracts[[i]]
+
+  list("pl" = "This article does not exist in Polish.", "sv" = "This article does not exist in Swedish")
+  abstract_text <- ""
+
+  if (length(api_data$abstracts) < 1) {
+    index <- NULL
+  } else {
+    index <- 1:length(api_data$abstracts)
   }
 
-  if (lan %in% abstract$lang) {
-    abstract_text <- abstract$value[abstract$lang == lan]
-  } else {
+    for (i in index) {
+
+      if (api_data$abstracts[[i]]$abstract$`xml:lang` == lan) {
+        abstract_text <- paste(abstract_text, api_data$abstracts[[i]]$abstract$value)
+      }
+    }
+  if (abstract_text == "") {
     langs <- c(pl = "Polish", en = "English", sv = "Swedish")
     abstract_text <- paste0("This article does not exist in ", langs[lan], ".")
   }
@@ -101,3 +109,4 @@ parse_data <- function(api_data, lan = "en"){
   return(list("related_topics" = related_topics, "abstract_text" = abstract_text))
 
 }
+
