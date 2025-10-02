@@ -76,7 +76,14 @@ parse_data <- function(api_data, lan = "en"){
 
   body <- api_data$links
   links <- c()
-  for (i in 1:length(body[["results"]][["bindings"]])) {
+
+  if (length(body[["results"]][["bindings"]]) < 1) {
+    index <- NULL
+  } else {
+    index <- 1:length(body[["results"]][["bindings"]])
+  }
+
+  for (i in index) {
     links <- c(links, body[["results"]][["bindings"]][[i]][["link"]][["value"]])
   }
 
