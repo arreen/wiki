@@ -15,7 +15,7 @@ library(stringr)
 #'
 #' @examples api_wiki_data(current_article = "Helen_Abbey")
 
-api_wiki_data <- function(current_article = "Smoltification") {
+api_wiki_data <- memoise::memoise(function(current_article = "Smoltification") {
 
 
 
@@ -42,7 +42,7 @@ api_wiki_data <- function(current_article = "Smoltification") {
     req_perform()
 
   body <- resp_body_json(resp)
-  abstract <- body[["results"]][["bindings"]][[1]][["abstract"]]
+  abstract <- body[["results"]][["bindings"]]
 
   resp <- request("https://dbpedia.org/sparql") %>%
     req_url_query(
@@ -57,16 +57,17 @@ api_wiki_data <- function(current_article = "Smoltification") {
 
   data <- list(abstracts = abstract, links = non_parsed_links)
   return(data) # return the output
-}
+})
 
 a <- api_wiki_data("Poland")
+
 
 #' @title parse_data
 #' @description
 #' parses an output from api_wiki_data
 #'
 #' @param api_data The output you want to parse
-#' @param lan The language you want to print it out in. You can choose betweeen English, Polish and Swedish.
+#' @param lan The language you want to print it out in. You can choose betweeen English ("en"), Polish ("pl") and Swedish ("sv").
 #'
 #' @returns A list with related topics and the article abstract.
 #' @export
@@ -86,13 +87,16 @@ parse_data <- function(api_data, lan = "en"){
 
 
   # ----------------------------------------
-  for (i in 1:length(api_data$abstracts)) {
-    api_data$abstracts[[i]]
-  }
 
-  if (lan %in% abstract$lang) {
-    abstract_text <- abstract$value[abstract$lang == lan]
-  } else {
+  list("pl" = "This article does not exist in Polish.", "sv" = "This article does not exist in Swedish")
+  abstract_text <- ""
+    for (i in 1:length(api_data$abstracts)) {
+
+      if (api_data$abstracts[[i]]$abstract$`xml:lang` == lan) {
+        abstract_text <- paste(abstract_text, api_data$abstracts[[i]]$abstract$value)
+      }
+    }
+  if (abstract_text == "") {
     langs <- c(pl = "Polish", en = "English", sv = "Swedish")
     abstract_text <- paste0("This article does not exist in ", langs[lan], ".")
   }
