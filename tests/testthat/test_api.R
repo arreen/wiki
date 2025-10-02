@@ -26,11 +26,11 @@ test_that("Can it get an abstract",{
 })
 
 test_that("Can get a reference",{
-  expect_equal("http://dbpedia.org/resource/Seawater" %in% unlist(api_wiki_data("Smoltification")))
-  expect_output("http://dbpedia.org/resource/Naval_Postgraduate_School" %in% unlist(api_wiki_data(women_in_statistics[test_sample[1], 1])))
-  expect_output("http://dbpedia.org/resource/Sichuan_University" %in% unlist(api_wiki_data(women_in_statistics[test_sample[2], 1])))
-  expect_output("http://dbpedia.org/resource/Metabolomics" %in% unlist(api_wiki_data(women_in_statistics[test_sample[3], 1])))
-  expect_output("http://dbpedia.org/resource/Carpathian_Mountains" %in% unlist(api_wiki_data("Konik")), TRUE)
+  expect_equal("http://dbpedia.org/resource/Seawater" %in% unlist(api_wiki_data("Smoltification")), TRUE)
+  expect_equal("http://dbpedia.org/resource/Naval_Postgraduate_School" %in% unlist(api_wiki_data(women_in_statistics[test_sample[1], 1])), TRUE)
+  expect_equal("http://dbpedia.org/resource/Sichuan_University" %in% unlist(api_wiki_data(women_in_statistics[test_sample[2], 1])), TRUE)
+  expect_equal("http://dbpedia.org/resource/Metabolomics" %in% unlist(api_wiki_data(women_in_statistics[test_sample[3], 1])), TRUE)
+  expect_equal("http://dbpedia.org/resource/Carpathian_Mountains" %in% unlist(api_wiki_data("Konik")), TRUE)
 })
 
 test_that("Will it reject non string inputs?",{
