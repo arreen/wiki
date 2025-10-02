@@ -13,4 +13,4 @@ test2 <- str_replace(test2, pattern = "/wiki/", replacement = "")
 
 women_in_statistics <- test2
 
-saveRDS(women_in_statistics, file = "women_in_statistics.rds")
+saveRDS(women_in_statistics, file = "women_in_statistics.rda")
