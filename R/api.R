@@ -1,3 +1,5 @@
+library(stringr)
+
 #' @title
 #' api_wiki_data
 #' @description
@@ -14,12 +16,50 @@
 #' @examples api_wiki_data(current_article = "Helen_Abbey")
 
 api_wiki_data <- function(current_article = "Smoltification") {
-  db <- "http://dbpedia.org/resource/" # all article starts with "http://dbpedia.org/resource/*."
-  link <- paste0(db, current_article) # we add the subfolder to the article
-  data <- list(json = fromJSON(paste0("http://dbpedia.org/data/", current_article, ".json")), link = link) # the output contains the .json it's link
-  if(length(data[["json"]]) == 0){warning("There is no article for that input.\nEither the article does not exist or you have written the article wrong\nNote: current_article is hard case sensitive")}
+
+
+
+  sparql_query_abstract <- paste0("PREFIX dbo: <http://dbpedia.org/ontology/>
+                                  SELECT ?abstract
+                                WHERE {
+                                  <http://dbpedia.org/resource/", current_article, "> dbo:abstract ?abstract
+
+                                  FILTER (lang(?abstract) IN ('en', 'sv', 'pl'))
+                                }")
+
+  sparsql_query_topics <- paste0("PREFIX dbo: <http://dbpedia.org/ontology/>
+                                 SELECT ?link
+                               WHERE {
+                                 <http://dbpedia.org/resource/", current_article, "> dbo:wikiPageWikiLink ?link .
+                               }
+                                 LIMIT 15")
+
+  resp <- request("https://dbpedia.org/sparql") %>%
+    req_url_query(
+      query  = sparql_query_abstract,
+      format = "application/sparql-results+json"
+    ) %>%
+    req_perform()
+
+  body <- resp_body_json(resp)
+  abstract <- body[["results"]][["bindings"]][[1]][["abstract"]]
+
+  resp <- request("https://dbpedia.org/sparql") %>%
+    req_url_query(
+      query  = sparsql_query_topics,
+      format = "application/sparql-results+json"
+    ) %>%
+    req_perform()
+
+  # Här sätter man typ return istället för body <- resp_body_json(...)
+  non_parsed_links <- resp_body_json(resp)
+
+
+  data <- list(abstracts = abstract, links = non_parsed_links)
   return(data) # return the output
 }
+
+a <- api_wiki_data("Poland")
 
 #' @title parse_data
 #' @description
@@ -33,19 +73,30 @@ api_wiki_data <- function(current_article = "Smoltification") {
 #'
 #' @examples parse_data(api_wiki_data(current_article = "Helen_Abbey"))
 #'
+#'
 parse_data <- function(api_data, lan = "en"){
-  data <- api_data$json
-  information <- data[[api_data$link]]
-  abstract <- information[[which(str_detect(names(information), "abstract")) ]]
+
+  body <- api_data$links
+  links <- c()
+  for (i in 1:length(body[["results"]][["bindings"]])) {
+    links <- c(links, body[["results"]][["bindings"]][[i]][["link"]][["value"]])
+  }
+
+  related_topics <- str_remove(links, "http://dbpedia.org/resource/")
+
+
+  # ----------------------------------------
+  for (i in 1:length(api_data$abstracts)) {
+    api_data$abstracts[[i]]
+  }
+
   if (lan %in% abstract$lang) {
     abstract_text <- abstract$value[abstract$lang == lan]
   } else {
     langs <- c(pl = "Polish", en = "English", sv = "Swedish")
     abstract_text <- paste0("This article does not exist in ", langs[lan], ".")
   }
-
-
-  related_topics <- str_remove(information[[which(str_detect(names(information), "wikiPageWikiLink")) ]]$value, "http://dbpedia.org/resource/")
+  # ----------------------------------------
 
   return(list("related_topics" = related_topics, "abstract_text" = abstract_text))
 
