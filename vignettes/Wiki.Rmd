@@ -14,6 +14,21 @@ knitr::opts_chunk$set(
 )
 ```
 
+This package connects to parsed wikipedia articles through the dbpedia.org API. The aim of the package is to extract the abstract of the given article as well as 15 related topics that are also in dbpedia. By doing this one can later construct a game similar to www.thewikigamedaily.com. 
+
 ```{r setup}
 library(Wiki)
+
+```
+
+The package contains 2 functions. api_wiki_data and parse_data. 
+
+```{r}
+example <- api_wiki_data(current_article = "Smoltification")
+```
+
+api_wiki_data is the function that calls the API and has memoise attached to cache the outputs to not overuse the API. parse_data is needed to clean the output to a more useable form.
+
+```{r}
+parse_data(example)
 ```

@@ -2,7 +2,7 @@
 #' @usage data(women_in_statistics)
 #' @description Sample data for this package. This contains the links to all the statisticians mentioned in the list.
 #'
-#' @format A
+#' @format
 #' \describe{
 #' This is just a vector with subfolders. For example "Helen_Abbey" is a string that describes a page. So it refers to https://en.wikipedia.org/wiki/Helen_Abbey.
 #'
