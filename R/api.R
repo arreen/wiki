@@ -9,7 +9,7 @@
 #' @param current_article The article that should return a .json.
 #'
 #' @returns A .json file of the article
-#' @import httr2 jsonlite
+#' @import httr2
 #' @export
 #'
 #' @examples api_wiki_data(current_article = "Helen_Abbey")
@@ -33,24 +33,24 @@ api_wiki_data <- memoise::memoise(function(current_article = "Smoltification") {
                                }
                                  LIMIT 15")
 
-  resp <- req_perform(
-    req_url_query(request("https://dbpedia.org/sparql"),
+  resp <- httr2::req_perform(
+    httr2::req_url_query(httr2::request("https://dbpedia.org/sparql"),
       query  = sparsql_query_abstract,
       format = "application/sparql-results+json"
     ) )
 
 
-  body <- resp_body_json(resp)
+  body <- httr2::resp_body_json(resp)
   abstract <- body[["results"]][["bindings"]]
 
-  resp <- req_perform(
-    req_url_query(request("https://dbpedia.org/sparql"),
+  resp <- httr2::req_perform(
+    httr2::req_url_query(httr2::request("https://dbpedia.org/sparql"),
                   query  = sparsql_query_topics,
                   format = "application/sparql-results+json"
     ) )
 
   # Här sätter man typ return istället för body <- resp_body_json(...)
-  non_parsed_links <- resp_body_json(resp)
+  non_parsed_links <- httr2::resp_body_json(resp)
 
 
   data <- list(abstracts = abstract, links = non_parsed_links)
@@ -80,7 +80,7 @@ parse_data <- function(api_data, lan = "en"){
     links <- c(links, body[["results"]][["bindings"]][[i]][["link"]][["value"]])
   }
 
-  related_topics <- str_remove(links, "http://dbpedia.org/resource/")
+  related_topics <- stringr::str_remove(links, "http://dbpedia.org/resource/")
 
 
   # ----------------------------------------
