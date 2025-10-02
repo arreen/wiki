@@ -17,11 +17,3 @@ devtools::install_github("arreen/wiki")
 library(wiki)
 ```
 
-## Example
-
-For more information look at the vignette:
-
-``` r
-vignette("Wiki")
-#> Warning: vignette 'Wiki' not found
-```
