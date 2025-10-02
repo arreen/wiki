@@ -13,7 +13,7 @@ The goal of Wiki is to connect to the dbpedia API and clean the data.
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("arreen/wiki")
+devtools::install_github("arreen/wiki", build_vignettes = TRUE)
 library(wiki)
 ```
 
