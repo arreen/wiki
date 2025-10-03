@@ -16,7 +16,7 @@
 
 api_wiki_data <- memoise::memoise(function(current_article = "Smoltification") {
 
-
+  stopifnot(is.character(current_article))
 
   sparsql_query_abstract <- paste0("PREFIX dbo: <http://dbpedia.org/ontology/>
                                   SELECT ?abstract
@@ -54,6 +54,9 @@ api_wiki_data <- memoise::memoise(function(current_article = "Smoltification") {
 
 
   data <- list(abstracts = abstract, links = non_parsed_links)
+
+  class(data) <- "api_wiki"
+
   return(data) # return the output
 })
 
@@ -73,6 +76,9 @@ api_wiki_data <- memoise::memoise(function(current_article = "Smoltification") {
 #'
 
 parse_data <- function(api_data, lan = "en"){
+  stopifnot(length(api_data) > 0)
+  stopifnot(lan %in% c("en", "sv", "pl"))
+  stopifnot(class(api_data) == "api_wiki")
 
   body <- api_data$links
   links <- c()
@@ -113,7 +119,7 @@ parse_data <- function(api_data, lan = "en"){
   }
   # ----------------------------------------
 
+
   return(list("related_topics" = related_topics, "abstract_text" = abstract_text))
 
 }
-
